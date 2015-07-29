@@ -1,7 +1,7 @@
 {
   "name": "ember-cli-deploy-azure-blob",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.0.1",
+  "description": "Deploy assets from Ember App to Azure Blob using ember-cli-deploy.",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -11,11 +11,11 @@
     "build": "ember build",
     "test": "ember try:testall"
   },
-  "repository": "",
+  "repository": "https://github.com/duizendnegen/ember-cli-deploy-azure-blob",
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": "Pepijn Schoen",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.2",
@@ -34,10 +34,15 @@
     "ember-try": "0.0.4"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "ember-cli-deploy-plugin"
   ],
   "dependencies": {
-    "ember-cli-babel": "^5.0.0"
+    "azure-storage": "^0.4.2",
+    "ember-cli-babel": "^5.0.0",
+    "ember-cli-deploy-plugin": "^0.1.2",
+    "mime": "^1.2.11",
+    "walk": "^2.3.9"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

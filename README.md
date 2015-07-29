@@ -1,25 +1,35 @@
 # Ember-cli-deploy-azure-blob
 
-This README outlines the details of collaborating on this Ember addon.
+Deploy assets from Ember App to Azure Blob using [ember-cli-deploy](https://github.com/ember-cli/ember-cli-deploy). This plugin is for `ember-cli-deploy` >= 0.5.0.
+See [ember-cli-deploy-azure](https://github.com/duizendnegen/ember-cli-deploy-azure) for a plugin pack for Azure Tables, Azure Blob & the default build and hashing included.
 
 ## Installation
 
-* `git clone` this repository
-* `npm install`
-* `bower install`
+* `npm install ember-cli-deploy-azure-blob`
+* `npm install ember-cli-deploy-build` (or another ember-cli-deploy build tool)
 
-## Running
+## Configuration
 
-* `ember server`
-* Visit your app at http://localhost:4200.
+In your `config/deploy.js` file:
+```javascript
+module.exports = function(environment) {
+  var ENV = {};
 
-## Running Tests
+  if (environment === 'production') {
+    ENV["azure-blob"] = {
+      storageAccount: "my-storage-account",
+      storageAccessKey: "my-access-key",
+      containerName: "my-container-name" // defaults to 'emberdeploy'
+    };
+  }
 
-* `ember test`
-* `ember test --server`
+  return ENV;
+}
+```
 
-## Building
+You can also connect using your connection string, set it as `connectionString: "my-connection-string"`.
+It's possible to gzip assets, but it leads to strange results (https://github.com/duizendnegen/ember-cli-deploy-azure/issues/6).
 
-* `ember build`
+## Usage
 
-For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
+* `ember deploy <environment>` to build and upload all assets to the Azure Blob

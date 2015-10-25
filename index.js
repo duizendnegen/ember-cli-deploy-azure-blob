@@ -50,7 +50,7 @@ module.exports = {
 
         var containerName = this.readConfig("containerName");
         var distDir       = context.distDir;
-        this.log("uploading files from " + distDir + "...");
+        this.log("uploading files from " + distDir + "...", { verbose: true });
 
         return new Promise(function(resolve, reject) {
           // create container
@@ -81,14 +81,14 @@ module.exports = {
 
                   walker.on("errors", function(root, nodeStatsArray, next) {
                     nodeStatsArray.forEach(function (n) {
-                      this.log("[ERROR] " + n.name, {color: 'red'});
-                      this.log(n.error.message || (n.error.code + ": " + n.error.path), {color: 'red'});
+                      this.log("[ERROR] " + n.name, {color: 'red', verbose: true});
+                      this.log(n.error.message || (n.error.code + ": " + n.error.path), {color: 'red', verbose: true});
                     });
                     reject();
                   });
 
                   walker.on("end", function() {
-                    _this.log("upload succeeded");
+                    _this.log("upload succeeded", { verbose: true });
                     resolve();
                   });
                 } else {
@@ -130,8 +130,8 @@ module.exports = {
               if(!error){
                 // file uploaded
               } else {
-                _this.log("Error uploading " + targetFile, { color: 'red'});
-                _this.log(error, { color: 'red'});
+                _this.log("Error uploading " + targetFile, { color: 'red', verbose: true});
+                _this.log(error, { color: 'red', verbose: true});
               }
 
               next();

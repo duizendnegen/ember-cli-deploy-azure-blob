@@ -1,6 +1,6 @@
 {
   "name": "ember-cli-deploy-azure-blob",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Deploy assets from Ember App to Azure Blob using ember-cli-deploy.",
   "directories": {
     "doc": "doc",
@@ -40,7 +40,7 @@
   "dependencies": {
     "azure-storage": "^0.4.2",
     "ember-cli-babel": "^5.0.0",
-    "ember-cli-deploy-plugin": "^0.1.2",
+    "ember-cli-deploy-plugin": "^0.2.0",
     "mime": "^1.2.11",
     "walk": "^2.3.9"
   },

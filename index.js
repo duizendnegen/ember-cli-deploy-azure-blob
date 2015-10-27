@@ -82,13 +82,13 @@ module.exports = {
                   walker.on("errors", function(root, nodeStatsArray, next) {
                     nodeStatsArray.forEach(function (n) {
                       this.log("[ERROR] " + n.name, {color: 'red', verbose: true});
-                      this.log(n.error.message || (n.error.code + ": " + n.error.path), {color: 'red', verbose: true});
+                      this.log(n.error.message || (n.error.code + ": " + n.error.path), {color: 'red'});
                     });
                     reject();
                   });
 
                   walker.on("end", function() {
-                    _this.log("upload succeeded", { verbose: true });
+                    _this.log("upload succeeded");
                     resolve();
                   });
                 } else {
@@ -130,7 +130,7 @@ module.exports = {
               if(!error){
                 // file uploaded
               } else {
-                _this.log("Error uploading " + targetFile, { color: 'red', verbose: true});
+                _this.log("Error uploading " + targetFile, { color: 'red'});
                 _this.log(error, { color: 'red', verbose: true});
               }
 

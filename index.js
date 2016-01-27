@@ -17,9 +17,7 @@ module.exports = {
       name: options.name,
 
       defaultConfig: {
-        containerName: 'emberdeploy',
-        gzipExtensions: ['js', 'css', 'svg'],
-        gzip: false
+        containerName: 'emberdeploy'
       },
 
       _createClient: function() {
@@ -45,6 +43,7 @@ module.exports = {
       },
 
       upload: function(context) {
+
         var client = this._createClient();
         var _this = this;
 
@@ -76,7 +75,8 @@ module.exports = {
                   var walker = walk.walk(distDir, { followLinks: false });
 
                   walker.on("file",  function (root, fileStats, next) {
-                    _this._uploadFile(root, fileStats, next, context.distDir, client);
+                    var gzippedFiles = context.gzippedFiles || [];
+                    _this._uploadFile(root, fileStats, next, context.distDir, client, gzippedFiles);
                   });
 
                   walker.on("errors", function(root, nodeStatsArray, next) {
@@ -101,7 +101,7 @@ module.exports = {
           });
         });
       },
-      _uploadFile: function(root, fileStat, next, distDir, client) {
+      _uploadFile: function(root, fileStat, next, distDir, client, gzippedFiles) {
         var _this = this;
 
         var containerName = this.readConfig("containerName");
@@ -113,12 +113,7 @@ module.exports = {
 
         var options = {}
 
-        var extname = path.extname(resolvedFile).replace('.');
-        var gzipExtensions = this.readConfig("gzipExtensions");
-        var hasBeenGziped = gzipExtensions.indexOf(extname) !== -1;
-        var gzipEnabled = this.readConfig("gzip");
-
-        if(gzipEnabled && hasBeenGziped) {
+        if (gzippedFiles.indexOf(targetFile) != -1) {
           options["contentEncoding"] = "gzip";
         }
 

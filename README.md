@@ -30,8 +30,12 @@ module.exports = function(environment) {
 }
 ```
 
+### Connection String
 You can also connect using your connection string, set it as `connectionString: "my-connection-string"`.
-It's possible to gzip assets, but it leads to strange results (https://github.com/duizendnegen/ember-cli-deploy-azure/issues/6).
+
+### Gzip Support
+If you're using [ember-cli-deploy-gzip](https://github.com/ember-cli-deploy/ember-cli-deploy-gzip) to automatically compress your assets using gzip, this plugin will automatically detect files that have been gzipped and set the proper `Content-Encoding` header within Azure Blob Storage.
+
 
 ## Usage
 

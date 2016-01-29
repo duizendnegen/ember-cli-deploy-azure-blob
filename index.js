@@ -51,6 +51,11 @@ module.exports = {
         var distDir       = context.distDir;
         this.log("uploading files from " + distDir + "...", { verbose: true });
 
+        var gzippedFiles = context.gzippedFiles || [];
+        var correctedGzippedFiles = gzippedFiles.map(function(gzippedFile) {
+          return path.normalize(gzippedFile);
+        });
+
         return new Promise(function(resolve, reject) {
           // create container
           client.createContainerIfNotExists(containerName, {publicAccessLevel : 'blob'}, function(error, result, response){
@@ -75,8 +80,7 @@ module.exports = {
                   var walker = walk.walk(distDir, { followLinks: false });
 
                   walker.on("file",  function (root, fileStats, next) {
-                    var gzippedFiles = context.gzippedFiles || [];
-                    _this._uploadFile(root, fileStats, next, context.distDir, client, gzippedFiles);
+                    _this._uploadFile(root, fileStats, next, context.distDir, client, correctedGzippedFiles);
                   });
 
                   walker.on("errors", function(root, nodeStatsArray, next) {

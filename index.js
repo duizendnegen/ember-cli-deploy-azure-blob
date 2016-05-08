@@ -17,7 +17,10 @@ module.exports = {
       name: options.name,
 
       defaultConfig: {
-        containerName: 'emberdeploy'
+        containerName: 'emberdeploy',
+        cacheControl: {
+          extensions: []
+        }
       },
 
       _createClient: function() {
@@ -43,7 +46,6 @@ module.exports = {
       },
 
       upload: function(context) {
-
         var client = this._createClient();
         var _this = this;
 
@@ -60,18 +62,18 @@ module.exports = {
           // create container
           client.createContainerIfNotExists(containerName, {publicAccessLevel : 'blob'}, function(error, result, response){
             if(!error){
+
               // set CORS
-
-              var serviceProperties = {};
-
-              serviceProperties.Cors = {
-                CorsRule: [{
-                  AllowedOrigins: ['*'],
-                  AllowedMethods: ['GET'],
-                  AllowedHeaders: [],
-                  ExposedHeaders: [],
-                  MaxAgeInSeconds: 60
-                }]
+              var serviceProperties = {
+                Cors: {
+                  CorsRule: [{
+                    AllowedOrigins: ['*'],
+                    AllowedMethods: ['GET'],
+                    AllowedHeaders: [],
+                    ExposedHeaders: [],
+                    MaxAgeInSeconds: 60
+                  }]
+                }
               };
 
               client.setServiceProperties(serviceProperties, function(error, result, response) {
@@ -105,6 +107,7 @@ module.exports = {
           });
         });
       },
+
       _uploadFile: function(root, fileStat, next, distDir, client, gzippedFiles) {
         var _this = this;
 
@@ -120,6 +123,9 @@ module.exports = {
         if (gzippedFiles.indexOf(targetFile) != -1) {
           options["contentEncoding"] = "gzip";
         }
+
+        // Set the cache control policy.
+        options['cacheControl'] = this._cacheControlPolicy(fileStat);
 
         client.doesBlobExist(containerName, targetFile, function(error, blobExists, response) {
           if(blobExists === true) {
@@ -137,6 +143,26 @@ module.exports = {
             });
           }
         });
+      },
+
+      _cacheControlPolicy: function(fileStat) {
+        var cacheControl = this.readConfig('cacheControl');
+
+        // Default cache policy.
+        var policy = 'no-cache, must-revalidate';
+
+        // Check for cache control extensions matches.
+        if (typeof cacheControl.extensions !== 'undefined') {
+          var validExtension = cacheControl.extensions.find(function(option) {
+            return option.extension === fileStat.name.split('.').pop(); // Get only the extension of the file.
+          });
+
+          if (typeof validExtension !== 'undefined') {
+            policy = validExtension.policy;
+          }
+        }
+
+        return policy;
       }
     });
 

@@ -19,7 +19,14 @@ module.exports = {
       defaultConfig: {
         containerName: 'emberdeploy',
         cacheControl: {
-          extensions: []
+          extensions: [
+            { extension: 'png', policy: 'max-age=604800' },
+            { extension: 'jpg', policy: 'max-age=604800' },
+            { extension: 'gif', policy: 'max-age=604800' },
+            { extension: 'jpeg', policy: 'max-age=604800' },
+            { extension: 'css', policy: 'max-age=86400' },
+            { extension: 'js', policy: 'max-age=86400' }
+          ]
         }
       },
 

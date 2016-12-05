@@ -36,6 +36,10 @@ You can also connect using your connection string, set it as `connectionString: 
 ### Gzip Support
 If you're using [ember-cli-deploy-gzip](https://github.com/ember-cli-deploy/ember-cli-deploy-gzip) to automatically compress your assets using gzip, this plugin will automatically detect files that have been gzipped and set the proper `Content-Encoding` header within Azure Blob Storage.
 
+### Fingerprinting
+Setup the fingerprint prepend url in your `ember-cli-build.js` file to point to your blob container.  This will ensure the index.html references the asset with absolute urls and will work regardless of relative folder structure.
+- http://ember-cli-deploy.com/docs/v0.6.x/fingerprinting/
+- https://ember-cli.com/user-guide/#fingerprinting-and-cdn-urls
 
 ## Usage
 

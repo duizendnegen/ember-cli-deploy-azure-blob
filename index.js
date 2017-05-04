@@ -3,7 +3,7 @@
 
 var DeployPluginBase = require('ember-cli-deploy-plugin');
 var azure       = require('azure-storage');
-var Promise     = require('ember-cli/lib/ext/promise');
+var Promise     = require('rsvp').Promise;
 var walk        = require('walk');
 var fs          = require('fs');
 var path        = require('path');

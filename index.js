@@ -160,7 +160,7 @@ module.exports = {
 
         // Check for cache control extensions matches.
         if (typeof cacheControl.extensions !== 'undefined') {
-          var validExtension = cacheControl.extensions.find(function(option) {
+          var validExtension = cacheControl.extensions.forEach(function(option) {
             return option.extension === fileStat.name.split('.').pop(); // Get only the extension of the file.
           });
 

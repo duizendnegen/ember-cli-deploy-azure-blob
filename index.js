@@ -121,9 +121,10 @@ module.exports = {
         var containerName = this.readConfig("containerName");
 
         var resolvedFile = path.resolve(root, fileStat.name);
-        var targetDirectory = path.normalize(root).replace(distDir + path.sep, "");
+        var normalizedRoot = path.normalize(root);
+        var targetDirectory = normalizedRoot === distDir ? undefined : normalizedRoot.replace(distDir + path.sep, "");
 
-        var targetFile = targetDirectory + path.sep + fileStat.name;
+        var targetFile = targetDirectory ? targetDirectory + path.sep + fileStat.name : fileStat.name;
 
         var options = {}
 

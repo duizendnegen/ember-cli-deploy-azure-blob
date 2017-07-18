@@ -58,6 +58,7 @@ module.exports = {
 
         var containerName = this.readConfig("containerName");
         var distDir       = context.distDir;
+        var shouldDeleteBlobs = this.readConfig("deleteBlobs");
         this.log("uploading files from " + distDir + "...", { verbose: true });
 
         var gzippedFiles = context.gzippedFiles || [];
@@ -65,54 +66,99 @@ module.exports = {
           return path.normalize(gzippedFile);
         });
 
-        return new Promise(function(resolve, reject) {
-          // create container
-          client.createContainerIfNotExists(containerName, {publicAccessLevel : 'blob'}, function(error, result, response){
-            if(!error){
-
-              // set CORS
-              var serviceProperties = {
-                Cors: {
-                  CorsRule: [{
-                    AllowedOrigins: ['*'],
-                    AllowedMethods: ['GET'],
-                    AllowedHeaders: [],
-                    ExposedHeaders: [],
-                    MaxAgeInSeconds: 60
-                  }]
-                }
-              };
-
-              client.setServiceProperties(serviceProperties, function(error, result, response) {
-                if(!error) {
-                  // walk the directory to be uploaded
-                  var walker = walk.walk(distDir, { followLinks: false });
-
-                  walker.on("file",  function (root, fileStats, next) {
-                    _this._uploadFile(root, fileStats, next, context.distDir, client, correctedGzippedFiles);
-                  });
-
-                  walker.on("errors", function(root, nodeStatsArray, next) {
-                    nodeStatsArray.forEach(function (n) {
-                      this.log("[ERROR] " + n.name, {color: 'red', verbose: true});
-                      this.log(n.error.message || (n.error.code + ": " + n.error.path), {color: 'red'});
-                    });
-                    reject();
-                  });
-
-                  walker.on("end", function() {
-                    _this.log("upload succeeded");
-                    resolve();
-                  });
-                } else {
-                  reject(error);
-                }
-              });
-            } else {
-              reject(error);
-            }
+        var createContainer = function(){
+          return new Promise(function(resolve, reject){
+            client.createContainerIfNotExists(containerName, {publicAccessLevel : 'blob'}, function(error, result, response){
+              if(error){ return reject(error); }
+              resolve();
+            });
           });
-        });
+        };
+
+        var setProperties = function(){
+          return new Promise(function(resolve, reject){
+            // set CORS
+            var serviceProperties = {
+              Cors: {
+                CorsRule: [{
+                  AllowedOrigins: ['*'],
+                  AllowedMethods: ['GET'],
+                  AllowedHeaders: [],
+                  ExposedHeaders: [],
+                  MaxAgeInSeconds: 60
+                }]
+              }
+            };
+            client.setServiceProperties(serviceProperties, function(error, result, response) {
+              if(error){ return reject(error); }
+              resolve();
+            });
+          });
+        };
+
+        var listAllBlobs = function(){
+          var blobs = [];
+          var listBlobs = function(continuationToken){
+            return new Promise(function(resolve, reject){
+              client.listBlobsSegmented(containerName, continuationToken, function(error, result, response){
+                if(error){ return reject(error); }
+                blobs = blobs.concat(result.entries.map(e => e.name));
+                if(result.continuationToken){ return resolve(listBlobs(result.continuationToken)); }
+                resolve(blobs);
+              });
+            });
+          };
+          
+          return listBlobs();
+        };
+
+        var deleteAllBlobs = function(blobs){
+          var deleteBlob = function(blob){
+            return new Promise(function(resolve, reject){
+              client.deleteBlob(containerName, blob, { deleteSnapshots: azure.BlobUtilities.SnapshotDeleteOptions.BLOB_AND_SNAPSHOTS}, function(error, result, response){
+                if(error){ return reject(error); }
+                resolve();
+              });
+            });
+          };
+
+          return Promise.all(blobs.map(deleteBlob));
+        };
+
+        var doUpload = function(){
+          return new Promise(function(resolve, reject){
+            // walk the directory to be uploaded
+            var walker = walk.walk(distDir, { followLinks: false });
+
+            walker.on("file",  function (root, fileStats, next) {
+              _this._uploadFile(root, fileStats, next, context.distDir, client, correctedGzippedFiles);
+            });
+
+            walker.on("errors", function(root, nodeStatsArray, next) {
+              nodeStatsArray.forEach(function (n) {
+                _this.log("[ERROR] " + n.name, {color: 'red', verbose: true});
+                _this.log(n.error.message || (n.error.code + ": " + n.error.path), {color: 'red'});
+              });
+              reject();
+            });
+
+            walker.on("end", function() {
+              _this.log("upload succeeded");
+              resolve();
+            });
+          });
+        };
+
+        if(shouldDeleteBlobs){
+          return createContainer()
+            .then(setProperties)
+            .then(listAllBlobs)
+            .then(deleteAllBlobs)
+            .then(doUpload);
+        }
+        return createContainer()
+          .then(setProperties)
+          .then(doUpload);
       },
 
       _uploadFile: function(root, fileStat, next, distDir, client, gzippedFiles) {
@@ -142,6 +188,7 @@ module.exports = {
             client.createBlockBlobFromLocalFile(containerName, targetFile, resolvedFile, options, function(error, result, response){
               if(!error){
                 // file uploaded
+                _this.log("Uploaded " + targetFile, { verbose: true });
               } else {
                 _this.log("Error uploading " + targetFile, { color: 'red'});
                 _this.log(error, { color: 'red', verbose: true});

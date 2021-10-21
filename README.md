@@ -22,7 +22,8 @@ module.exports = function(environment) {
     ENV["azure-blob"] = {
       storageAccount: "my-storage-account",
       storageAccessKey: "my-access-key",
-      containerName: "my-container-name" // defaults to 'emberdeploy'
+      containerName: "my-container-name", // defaults to 'emberdeploy'
+      folderPrefix: "myapp" // useful if your app has a non-empty rootURL. defaults to ''
     };
   }
 

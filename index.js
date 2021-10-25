@@ -18,6 +18,7 @@ module.exports = {
 
       defaultConfig: {
         containerName: 'emberdeploy',
+        folderPrefix: '',
         cacheControl: {
           extensions: [
             { extension: 'png', policy: 'max-age=604800' },
@@ -119,12 +120,16 @@ module.exports = {
         var _this = this;
 
         var containerName = this.readConfig("containerName");
+        var folderPrefix = this.readConfig("folderPrefix");
 
         var resolvedFile = path.resolve(root, fileStat.name);
         var normalizedRoot = path.normalize(root);
         var targetDirectory = normalizedRoot === distDir ? undefined : normalizedRoot.replace(distDir + path.sep, "");
 
         var targetFile = targetDirectory ? targetDirectory + path.sep + fileStat.name : fileStat.name;
+        if(folderPrefix) {
+          targetFile = folderPrefix.replace(/\/$/, "") + path.sep + targetFile;
+        }
 
         var options = {}
 
